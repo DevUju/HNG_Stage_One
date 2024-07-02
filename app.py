@@ -4,12 +4,13 @@ import requests
 
 app = Flask(__name__)
 
-headers = {'Authorization': 'Bearer 0d9e78a4407977'}
-API_Key = "9792ff02e8419b2c2ef8157cd36c3a05"
+IP = request.headers.getlist("X-Forwarded-For")
+API_KEY = "6ed1d1b943ab46b9804145041240207"
+URL = f"http://api.weatherapi.com/v1/current.json?key={API_KEY}&q={IP}"
 
 def get_user_location():
     try:
-        response = requests.get('https://ipinfo.io/' + request.remote_addr + '/json', headers=headers)
+        response = requests.get(url=URL)
         data = response.json()
         lat, lon = data['loc'].split(',')
         geolocator = Nominatim(user_agent="location_search")
@@ -21,19 +22,16 @@ def get_user_location():
 
 @app.route('/api/hello', methods=['GET'])
 def hello():
-    visitor_name = "Mark"
-    client_ip = "127.0.0.1"
-
+    visitor_name = input("Enter your name: ")
     # Get location from IP address
     location = get_user_location()
-
     # Get temperature from weather API
-    response = requests.get(f"http://api.openweathermap.org/geo/1.0/direct?q={location}&appid={API_Key}")
+    response= requests.get(url=URL)
     weather_data = response.json()
     temperature = weather_data['main']['temp']
 
     greeting = f'Hello, {visitor_name}!, the temperature is {temperature} degrees Celcius in {location}'
-    return jsonify({'client_ip': client_ip, 'location': location, 'greeting': greeting})
+    return jsonify({'client_ip': IP, 'location': location, 'greeting': greeting})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
