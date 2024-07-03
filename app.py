@@ -20,16 +20,15 @@ def get_user_location():
 
 @app.route('/api/hello', methods=['GET'])
 def hello():
-    visitor_name = request.args.get('name')
+    visitor_name = request.args.get('visitor_name')
     client_ip = get_user_location()
     print(client_ip)
     if client_ip:
         response = requests.get(f"http://api.weatherapi.com/v1/current.json?key={API_KEY}&q={client_ip}")
     else:
         response = "Location Does Not Exist!"
-    print(response.json())
-    # Get temperature from weather API
-    # response = requests.get(f"http://api.weatherapi.com/v1/current.json?key={API_KEY}&q={client_ip}")
+    
+
     weather_data = response.json()
     temperature = weather_data['current']['temp_f']
     location = weather_data['location']['region']
