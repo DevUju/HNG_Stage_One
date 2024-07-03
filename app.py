@@ -20,7 +20,7 @@ def get_user_location():
 
 @app.route('/api/hello', methods=['GET'])
 def hello():
-    visitor_name = request.args.get('visitor_name')
+    visitor_name = request.args.get('visitor_name', "Guest")
     client_ip = get_user_location()
     print(client_ip)
     if client_ip:
