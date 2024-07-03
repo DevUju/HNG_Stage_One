@@ -6,12 +6,14 @@ app = Flask(__name__)
 
 
 API_KEY = "6ed1d1b943ab46b9804145041240207"
-IP_API_KEY = "b5ef005b5ede469f9e8bbff8a3031f3b"
 
 def get_user_location():
     try:
-        response = requests.get(f"https://ipgeolocation.abstractapi.com/v1/?api_key={IP_API_KEY}")
-        return response.json()["ip_address"]
+        if request.headers.getlist("X-Forwarded-For"):
+            user_ip = request.headers.getlist("X-Forwarded-For")[0]
+        else:
+            user_ip = request.remote_addr
+        return user_ip
     except:
         print("Error: Unable to detect your location.")
         return None
@@ -20,8 +22,14 @@ def get_user_location():
 def hello():
     visitor_name = request.args.get('name')
     client_ip = get_user_location()
+    print(client_ip)
+    if client_ip:
+        response = requests.get(f"http://api.weatherapi.com/v1/current.json?key={API_KEY}&q={client_ip}")
+    else:
+        response = "Location Does Not Exist!"
+    print(response.json())
     # Get temperature from weather API
-    response = requests.get(f"http://api.weatherapi.com/v1/current.json?key={API_KEY}&q={client_ip}")
+    # response = requests.get(f"http://api.weatherapi.com/v1/current.json?key={API_KEY}&q={client_ip}")
     weather_data = response.json()
     temperature = weather_data['current']['temp_f']
     location = weather_data['location']['region']
